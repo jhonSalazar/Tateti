@@ -8,7 +8,7 @@
  ============================================================================
  */
 //compilar con estos parametros
- //gcc conexiones.c TATETI.C -o juego $(pkg-config --cflags --libs opencv) -Wall -lpthread
+ //gcc -o juego conexiones.c TATETI.c $(pkg-config --cflags --libs opencv) -Wall -lpthread
 // y para ejecutar ./jugador  /home/jhon/cuadrago.jpg
  //ese path del archivo.juego  es relativo depende mucho del lugar donde uds lo guarden
 #include <stdio.h>
@@ -24,6 +24,7 @@
 #include <math.h>
 #include <math.h>
 #include <pthread.h>
+#include "conexiones.h"
 
 #include <cv.h>
 #include <highgui.h>
@@ -54,11 +55,7 @@ void dibujar_x(Cuadrante cuadrante,CvArr* img1);
 Cuadrante calcular_cuadrante(int x, int y);
 void dibujar_en_cuadrante(Cuadrante cuadrante,CvArr* img1);
 void mouseHandler(int event, int x, int y, int flags, void* param);
-int abrir_socket();
-void enlazar_puerto(int descriptor, int puerto) ;
-void escuchar_clientes(int socket, int cantidad);
-void transferencia_datos(int client_fd);
-void ciclo_de_conexiones(int master_descriptor);
+
 void* escuchar(void* nada);
 int main(int argc, char *argv[])
 {
@@ -273,103 +270,6 @@ void mouseHandler(int event, int x, int y, int flags, void* param)
 
 	
 }
-int abrir_socket() {
-
-	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd == -1)
-		perror("error al abrir el descriptor :");
-
-	return sockfd;
-
-}
-
-
-void enlazar_puerto(int descriptor, int puerto) {
-	struct sockaddr_in server;
-	int reu = 1;
-	int true;
-	// re-utilizo el puerto
-	if (setsockopt(descriptor,SOL_SOCKET, SO_REUSEADDR, &reu,
-			sizeof(true)) < 0) {
-		perror("no es posible enlazar puerto: ");
-		exit(EXIT_FAILURE);
-	}
-	//seteo la estructura del server
-	memset(&server, 0, sizeof(server));
-	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = htonl(INADDR_ANY);
-	server.sin_port = htons(puerto);
-	//enlazamos el puerto
-	if (bind(descriptor, (struct sockaddr *) &server, sizeof(server)) == -1) {
-		perror("fallo en la funcion bind: ");
-		exit(EXIT_FAILURE);
-	}
-
-}
-
-void escuchar_clientes(int descriptor, int cantidad) {
-	//cantidad de clientes que deseo escuchar
-	if (listen(descriptor, cantidad) < 0){
-		perror("no se puede transmitir la cola de escucha: ");
-		exit(EXIT_FAILURE);
-	}
-
-}
-
-
-void transferencia_datos(int client_fd){
-int tamanio_enviar=1024;
-    char buffer[10241], enviar[1024];
-int num;
- while(1) {
-        if ((num = recv(client_fd, buffer, 10240,0))== -1) {
-            //fprintf(stderr,"Error in receiving message!!\n");
-            perror("recv");
-            exit(1);
-        }   
-        else if (num == 0) {
-            printf("Connection closed\n");
-            exit(EXIT_FAILURE);
-        }
-    //  num = recv(client_fd, buffer, sizeof(buffer),0);
-        buffer[num] = '\0';
-        printf("Message received: %s\n", buffer);
-
-        printf("%s","enviar mensaje al jugador: " );
-
-        fgets(enviar,tamanio_enviar,stdin);
-
-        send(client_fd,enviar,tamanio_enviar,0);
-        }
-
-}
-
-
-
-void ciclo_de_conexiones(int socket_fd){
-struct sockaddr_in cliente;
-int client_fd;
-socklen_t size;
-	
-    while(1) {
-        size = sizeof(struct sockaddr_in);  
-
-        if ((client_fd = accept(socket_fd, (struct sockaddr *)&cliente, &size))==-1) {
-            //fprintf(stderr,"Accept Failure\n");
-            perror("accept");
-            exit(1);
-        }
-        printf("servidor conectado con %s\n", inet_ntoa(cliente.sin_addr));
-        //buffer = "Hello World!! I am networking!!\n";
-        	transferencia_datos(client_fd);
-
-        close(client_fd);   
-        close(socket_fd);   
-    }
-
-	
-}
-
 
 
 void* escuchar(void* nada){
@@ -378,10 +278,10 @@ void* escuchar(void* nada){
 
     socket_fd =abrir_socket();
 
-    enlazar_puerto(socket_fd, PORT);
-   printf("%s\n","escuchar a clientes" );
-    escuchar_clientes(socket_fd,5);
-    ciclo_de_conexiones(socket_fd);
+    	enlazar_puerto(socket_fd, PORT);
+   		printf("%s\n","escuchar a clientes" );
+   		 escuchar_clientes(socket_fd,5);
+    	ciclo_de_conexiones(socket_fd);
 
 
 	return NULL;
