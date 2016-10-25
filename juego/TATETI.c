@@ -44,10 +44,10 @@ typedef struct ccc{
 int RADIO=40;
 
 typedef enum {circulo=1,X=2}tipo_simbolo;
-int tipoSimbolo;
+int tipoSimbolo=1;
  IplImage* img = 0; 
- IplImage* img1 = 0; 
- char* name;
+ 
+
  int c=0;
  
 void dibujar_O(Cuadrante cuadrante,CvArr* img1);
@@ -86,22 +86,20 @@ int main(int argc, char *argv[])
   //channels  = img->nChannels;
   //data      = (uchar *)img->imageData;
  // printf("Processing a %dx%d image with %d channels\n",height,width,channels); 
-  printf("%s\n","elige el tipo de simbolo, O = 1,  X=2 \n");
-  scanf("%d",&tipoSimbolo);
-
+ 
   // create a window
+  void* result;
+  
   cvNamedWindow(argv[1], CV_WINDOW_AUTOSIZE);
   cvMoveWindow(argv[1],100, 100);
-  // Dibujo rectangulo Verde, Grosor 3, que compienza en el pixel pt1 y termina en pt2.
-	//cvRectangle( img, pt1 , pt2 , CV_RGB(0,255,0), 3, 8, 0 );
-	//cvRectangle( img, pt3 , pt4 , CV_RGB(25,0,0), 3, 8, 0 );
-	//cvRectangle( img, pt5 , pt6 , CV_RGB(25,80,50), 3, 8, 0 );
-  // invert the image
+
   
  	 cvSetMouseCallback(argv[1],mouseHandler,0);
-	pthread_create(&p_thread, NULL, &escuchar, NULL);
-	cvShowImage(argv[1], img);
 	
+
+	cvShowImage(argv[1], img);
+	pthread_create(&p_thread, NULL, &escuchar, NULL);
+  	
 	// Lazo infinito. Sale cuando presiono la tecla ESCAPE
 	
 	//pthread_join(p_thread,NULL);

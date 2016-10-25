@@ -41,7 +41,7 @@ typedef struct ccc{
 int RADIO=40;
 int socket_fd;
 typedef enum {circulo=1,X=2}tipo_simbolo;
-int tipoSimbolo;
+int tipoSimbolo=2;
  IplImage* img = 0; 
  IplImage* img1 = 0; 
  char* name;
@@ -86,10 +86,12 @@ int main(int argc, char *argv[])
   //channels  = img->nChannels;
   //data      = (uchar *)img->imageData;
  // printf("Processing a %dx%d image with %d channels\n",height,width,channels); 
-  printf("%s\n","elige el tipo de simbolo, O = 1,  X=2 \n");
-  scanf("%d",&tipoSimbolo);
+  //printf("%s\n","elige el tipo de simbolo, O = 1,  X=2 \n");
+  //scanf("%d",&tipoSimbolo);
 
   // create a window
+ 
+  
   cvNamedWindow(argv[1], CV_WINDOW_AUTOSIZE);
   cvMoveWindow(argv[1],100, 100);
   // Dibujo rectangulo Verde, Grosor 3, que compienza en el pixel pt1 y termina en pt2.
@@ -99,9 +101,10 @@ int main(int argc, char *argv[])
   // invert the image
   
  	 cvSetMouseCallback(argv[1],mouseHandler,0);
-	pthread_create(&p_thread, NULL, &conectarse_servidor, NULL);
-	cvShowImage(argv[1], img);
 	
+	cvShowImage(argv[1], img);
+	pthread_create(&p_thread, NULL,&conectarse_servidor, NULL);
+   
 	// Lazo infinito. Sale cuando presiono la tecla ESCAPE
 	
 	//pthread_join(p_thread,NULL);

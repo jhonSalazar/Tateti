@@ -121,20 +121,95 @@ void conectar(int socket_fd){
 	}
     else
     {
-    	printf("%s","enviar mensaje al servidor:" );
+    	printf("%s","enviar mensaje al servidor:");
     	transferencia_datos_server(socket_fd);
     }
 
 
 }
-void transferencia_datos_server(int client_fd){
+void transferencia_datos_server(int servidor_fd){
 int tamanio_enviar=1024;
  char  enviar[1024];
+ int tamanioMensaje,valor;
+valor=HS;
+tamanioMensaje=4;
 
-		printf("%s", "enviar mensaje al servidor:  ");
-		fgets(enviar,tamanio_enviar,stdin);
-		send(client_fd,enviar,tamanio_enviar,0);
-		transferencia_datos( client_fd);
+//memcpy(buffer,&valor,tamanioMensaje);
+//void* buffer;
+//memcpy(buffer,&valor,tamanioMensaje);
+	//	
+	//	fgets(enviar,tamanio_enviar,stdin);
+		enviarPaquete(servidor_fd,HS,&valor,tamanioMensaje);
+		//send(servidor_fd,enviar,tamanio_enviar,0);
+		//enum{HS=99,simbolo=2,coordenadas=3}
+		//void enviarPaquete(int fdCliente, int tipoMensaje, void * mensaje, int tamanioMensaje)
+		
+		
+		//transferencia_datos( servidor_fd);
 
 
+}
+
+int enviarPorSocket(int fdCliente, const void * mensaje, int tamanio) {
+	int bytes_enviados;
+	int total = 0;
+
+	while (total < tamanio) {
+		bytes_enviados = send(fdCliente, mensaje + total, tamanio, 0);
+		if (bytes_enviados == FAIL) {
+			break;
+		}
+		total += bytes_enviados;
+		tamanio -= bytes_enviados;
+	}
+
+	if (bytes_enviados == FAIL) perror("[ERROR] Funcion send");
+	
+	return bytes_enviados;
+}
+
+int recibirPorSocket(int fdCliente, void * buffer, int tamanio) {
+	int total = 0;
+	int bytesRecibidos;
+
+	while (total < tamanio) {
+		bytesRecibidos = recv(fdCliente, buffer + total, tamanio, 0);
+		if (bytesRecibidos == FAIL) {
+			// Error
+			perror("[ERROR] Funcion recv");
+			break;
+		}
+		if (bytesRecibidos == 0) {
+			// Desconexion
+			break;
+		}
+		total += bytesRecibidos;
+		tamanio -= bytesRecibidos;
+	}
+	return bytesRecibidos;
+}	// retorna 
+
+void enviarPaquete(int fdCliente, int tipoMensaje, void * mensaje, int tamanioMensaje){
+	cabeceraMensaje nuevoMensaje;
+	nuevoMensaje.tipo = tipoMensaje;
+	nuevoMensaje.tamanio = tamanioMensaje;
+	printf("tamanio:%d tipo:%d\n",nuevoMensaje.tamanio,nuevoMensaje.tipo );
+	enviarPorSocket(fdCliente, (void *) &nuevoMensaje, sizeof(cabeceraMensaje));
+	enviarPorSocket(fdCliente, mensaje, nuevoMensaje.tamanio);
+}
+
+void * recibirPaquete(int fdCliente, int * tipoMensaje, int * tamanioMensaje){
+	cabeceraMensaje nuevoMensaje;
+	int recibido = recibirPorSocket(fdCliente, &nuevoMensaje, sizeof(cabeceraMensaje));
+	if (recibido > 0) {
+		printf("el tamanioMensaje es:%d\n", nuevoMensaje.tamanio);
+		void * buffer = malloc(nuevoMensaje.tamanio);
+		recibido = recibirPorSocket(fdCliente, buffer, nuevoMensaje.tamanio);
+		if (recibido > 0) {
+			*tipoMensaje = nuevoMensaje.tipo;
+			*tamanioMensaje = nuevoMensaje.tamanio;
+			return buffer;
+		}
+	}
+	return NULL;
 }
