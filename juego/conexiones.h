@@ -30,48 +30,50 @@
 #define C2_Y1 16
 #define C2_Y2 105
 
- #define C3_X1 197
-	#define C3_X2 285
-	#define C3_Y1 16
-	#define C3_Y2 105
+#define C3_X1 197
+#define C3_X2 285
+#define C3_Y1 16
+#define C3_Y2 105
 
-	 #define C4_X1 18
-	#define C4_X2 107
-	#define C4_Y1 105
-	#define C4_Y2 194
+#define C4_X1 18
+#define C4_X2 107
+#define C4_Y1 105
+#define C4_Y2 194
 
- 	#define C5_X1 107
-	#define C5_X2 200
-	#define C5_Y1 105
-	#define C5_Y2 194
+#define C5_X1 107
+#define C5_X2 200
+#define C5_Y1 105
+#define C5_Y2 194
 
- 	#define C6_X1 200
-	#define C6_X2 285
-	#define C6_Y1 105
-	#define C6_Y2 194
+#define C6_X1 200
+#define C6_X2 285
+#define C6_Y1 105
+#define C6_Y2 194
 
- 	#define C7_X1 18
-		#define C7_X2 107
-		#define C7_Y1 194
-		#define C7_Y2 285
+#define C7_X1 18
+#define C7_X2 107
+#define C7_Y1 194
+#define C7_Y2 285
 
- 		#define C8_X1 107
-		#define C8_X2 200
-		#define C8_Y1 194
-		#define C8_Y2 285
+#define C8_X1 107
+#define C8_X2 200
+#define C8_Y1 194
+#define C8_Y2 285
 
- 		#define C9_X1 200
-		#define C9_X2 285
-		#define C9_Y1 194
-		#define C9_Y2 285
+#define C9_X1 200
+#define C9_X2 285
+#define C9_Y1 194
+#define C9_Y2 285
  //varibales para definir coodenadas del los cuadrante
 
 
 
-/**********************************************
+ /**********************************************
 MATRIZ DE ESTADOS 1 esta libre y 0 esta ocupado. por el momento todos estan libres;
 ******************************************************/
 int matriz_estados[3][3];
+
+//sirve para calcular si todos los cuadrantes consecutivos tiene el mismo simbolo
 int matriz_consecutivos[3][3];
 
 
@@ -85,7 +87,6 @@ int matriz_consecutivos[3][3];
 
 #define ESC_KEY 27
 
-//variables globales
 
 //struct
 
@@ -108,34 +109,153 @@ typedef struct ccc{
  /*
 devuelve un descriptor para poder comunicarse con el cliente;
  */
+//Variables globales
 int vg_socket_fd;
 int vg_cliente_fd;
 Cuadrante vg_cuadrante;
 int vg_simbolo_jugador;
 int vg_simbolo_retador;
-IplImage* img1;
-char* name;
+IplImage* vg_img1;
+IplImage* vg_img; 
+char* vg_name;
+ char vg_key;
 typedef enum {circulo=1,X=2}tipo_simbolo;
- IplImage* img; 
- char key;
+ 
+
 //prototipos.....
- int tiene_valores_consecutivos(int matriz_consecutivos[3][3],int tipoSimbolo);
- int dibujo_segun_estado(int matriz_estados[3][3],int matriz_consecutivos[3][3],int tipoSimbolo,Cuadrante cuadrante);
-void dibujar_O(Cuadrante cuadrante,CvArr* img1);
- void dibujar_x(Cuadrante cuadrante,CvArr* img1);
- Cuadrante calcular_cuadrante(int x, int y);
- void dibujar_en_cuadrante(Cuadrante cuadrante,CvArr* img1,int tipo_simbolo);
- void dibujar_en_cuadrante_desde_cliente(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo);
+/*************************************************************
+Int abrir_socket();                                          *
+DEVUELVO UN DESCRIPTOR PARA PODER COMUNICARME CON EL SERVIDOR*
+**************************************************************/
 int abrir_socket();
-void enlazar_puerto(int descriptor, int puerto) ;
+
+/********************************************************************************************************************
+int dibujo_segun_estado(int matriz_estados[3][3],int matriz_consecutivos[3][3],int tipoSimbolo,Cuadrante cuadrante);*
+ESTA FUNCION ME DEVUELVE  1 SI EL CUADRANTE DONDE VOY A DIBUJAR ESTA VACION Y 0 SE YA ESTA OCUPADO                  *   
+*********************************************************************************************************************/
+int dibujo_segun_estado(int matriz_estados[3][3],int matriz_consecutivos[3][3],int tipoSimbolo,Cuadrante cuadrante);
+
+
+
+/******************************************************************************************
+int tiene_valores_consecutivos(int matriz_consecutivos[3][3],int tipoSimbolo);            *
+ESTA FUNCIONES ME CALCULA SI EL SIMBOLO ESTA DIBUJADO CONSECUTIVAMETE,                    *
+DE ESA MANERA PUEDO SABER SI YA SE DIBUJARON 3 SIMBOLOS CONSECUTIVOS POR EJEMPLO XXX o OOO*
+TANTO DIAGONAL, HORIZONAL Y VERTICAL.                                                     *
+*******************************************************************************************/ 
+int tiene_valores_consecutivos(int matriz_consecutivos[3][3],int tipoSimbolo);
+
+
+
+
+
+/*******************************************************************
+void dibujar_O(Cuadrante cuadrante,CvArr* img1);				   *
+void dibujar_x(Cuadrante cuadrante,CvArr* img1);				   *
+ESTAN FUNCIONES ME PERMITEN DIBUJAR EN LA IMAGEN, EL SIMBOLO X o O *
+********************************************************************/
+void dibujar_O(Cuadrante cuadrante,CvArr* img1);
+void dibujar_x(Cuadrante cuadrante,CvArr* img1);
+
+
+/*********************************************************
+Cuadrante calcular_cuadrante(int x, int y);				 *
+ESTA FUNCIONE ME CALCULA LAS COORDENADAS CORRESPONDIENTES*
+ PARA PODER DIBUJARLAS EN LA IMAGEN 					 *
+**********************************************************/
+Cuadrante calcular_cuadrante(int x, int y);
+
+
+
+/*********************************************************************************
+void dibujar_en_cuadrante(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo);		 *
+ESTA FUNCION DIBUJA EN EL CUADRANTE CORRESPONDIENTE EN FUNCION A LA QUE RECIBO DE*
+LA FUNCION calcular_cuadran(int, int). HAGO USO DE ESTA FUNCION CUANDO HAGO CLICK* 
+DONDE QUIERO DIBUJARLAS                                                          *
+**********************************************************************************/
+void dibujar_en_cuadrante(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo);
+
+
+
+/*****************************************************************************************
+void dibujar_en_cuadrante_desde_cliente(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo);*
+ES LA FUNCION, CONTIENE LA MISMA LOGICA, A DIFERENCIA QUE LA UTILIZO* 					 *
+EN EL MINSTANTE QUE RECIBO LOS PAQUETES                                 *     			 *
+******************************************************************************************/
+void dibujar_en_cuadrante_desde_cliente(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo);
+
+
+
+
+/****************************************************
+void enlazar_puerto(int descriptor, int puerto);	*
+ENLAZA EL PUERTO DONDE VOY A ESCUCHAR LAS CONEXIONES*
+*****************************************************/
+void enlazar_puerto(int descriptor, int puerto);
+
+
+/************************************************
+void escuchar_clientes(int socket, int cantidad)*
+												*
+CON ESTA FUNCIONES VOY A CONFIGURAR LAS CANTIDAD* 
+DE CLIENTES QUE PUEDO TENER EN ESPERA.          * 
+*************************************************/
 void escuchar_clientes(int socket, int cantidad);
-void mouseHandler(int event, int x, int y, int flags, void* param);
+
+
+/*******************************************************************
+void transferencia_datos();										   *
+ESA FUNCION ME PERMITE RECIBIR EL PAQUETE DE DATOS CORRESPONDIENTE *
+A LAS COORDENADAS DEL BIBUJO QUE VOY A RECIBIR DE PARTE DEL CLIENTE*
+POR EJEMPLO: UNA X CON LOS PUNTOS (X,Y);                           *
+********************************************************************/
+
+
 void transferencia_datos();
+
+
+
+/************************************************
+void ciclo_de_conexiones(int master_descriptor);*
+CON ESTA FUNCION ACEPTO LAS conexiones 			*
+*************************************************/
 void ciclo_de_conexiones(int master_descriptor);
-void conectar(int socket_fd);
-void transferencia_datos_server(int client_fd);
+
+
+/*************************************************************************
+int enviarPorSocket(int fdCliente, const void * mensaje, int tamanio);	**
+int recibirPorSocket(int fdCliente, void * buffer, int tamanio);		**
+																		**
+ESTAS FUNCION ME SRIVE PARA ENVIAR Y RECIBIR BYTES A TRAVES DE LOS SOCKET*
+**************************************************************************/
+
 int enviarPorSocket(int fdCliente, const void * mensaje, int tamanio);
 int recibirPorSocket(int fdCliente, void * buffer, int tamanio);
+
+
+/***************************************************************************************
+void enviarPaquete(int fdCliente, int tipoMensaje, void * mensaje, int tamanioMensaje);*
+void * recibirPaquete(int fdCliente, int * tipoMensaje, int * tamanioMensaje);		   *
+																					   *
+ESTA FUNCION ME AYUDA A ABSTRAERME DEL ENVIO DE PAQUETE,							   *
+ TANTO DE LAS COORDENADAS Y  EL TIPO DE SIMBOLO.									   *
+ RE UTILIZA LA FUNCIONES EnviarPorSocket y recibirPorSocket 						   *
+****************************************************************************************/
 void enviarPaquete(int fdCliente, int tipoMensaje, void * mensaje, int tamanioMensaje);
 void * recibirPaquete(int fdCliente, int * tipoMensaje, int * tamanioMensaje);
+
+
+
+
+
+
+/*******************************************************************
+void mouseHandler(int event, int x, int y, int flags, void* param);*
+CON ESTA FUNCION CALCULO LA COORDENADAS  CUANDO POSICIONO EL MOUSE *
+																   *
+********************************************************************/
+void mouseHandler(int event, int x, int y, int flags, void* param);
+
+
+
 #endif /* CONEXIONES_H_ */

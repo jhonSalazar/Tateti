@@ -26,29 +26,12 @@
 #define TRUE 1
 #define MAXSIZE 1024
 #define ESC_KEY 27
+ #define RADIO 40
 
 //variables globales
 
-//
-
- /**********************************************
-MATRIZ DE ESTADOS 1 esta libre y 0 esta ocupado. por el momento todos estan libres;
-******************************************************/
-int matriz_estados[3][3];
-int matriz_consecutivos[3][3];
-
-int RADIO;
-int vg_socket_fd;
-typedef enum {circulo=1,X=2}tipo_simbolo;
-int vg_simbolo_jugador;
-int vg_simbolo_retador;
- IplImage* img; 
- IplImage* img1; 
- int socket_fd;
- char* name;
-
-char key;
- typedef struct ccc{
+//structuras
+  typedef struct ccc{
 	int x1;
 	int x2;
 	int y1;
@@ -57,39 +40,130 @@ char key;
 	int pos2;
 }Cuadrante;
 
-Cuadrante vg_cuadrante;
 
-
-//estructuras
 typedef struct 
 {
 	int tipo;
 	int tamanio;
 
 }cabeceraMensaje;
- /*
-devuelve un descriptor para poder comunicarse con el cliente;
- */
+typedef enum {circulo=1,X=2}tipo_simbolo;
+
+
+
+
+//variables globales nomen clatura vg de variable global
+int vg_socket_fd;
+
+char* vg_ip;
+int vg_simbolo_jugador;
+int vg_simbolo_retador;
+IplImage* vg_img; 
+IplImage* vg_img1; 
+char* vg_name;
+char vg_key;
+Cuadrante vg_cuadrante;
+
+
+ /**********************************************
+MATRIZ DE ESTADOS 1 esta libre y 0 esta ocupado. por el momento todos estan libres;
+******************************************************/
+int matriz_estados[3][3];
+
+//sirve para calcular si todos los cuadrantes consecutivos tiene el mismo simbolo
+int matriz_consecutivos[3][3];
+
 
 
 //prototipos.....
+/***************************
+DEVUELVO UN DESCRIPTOR PARA PODER COMUNICARME CON EL SERVIDOR
+******************************/
 int abrir_socket();
+
+
+/************************************************************************************************
+ESTA FUNCION ME DEVUELVE  1 SI EL CUADRANTE DONDE VOY A DIBUJAR ESTA VACION Y 0 SE YA ESTA OCUPADO
+**************************************************************************************************/
 int dibujo_segun_estado(int matriz_estados[3][3],int matriz_consecutivos[3][3],int tipoSimbolo,Cuadrante cuadrante);
+
+
+
+
+/*********************************************************************
+ESTA FUNCIONES ME CALCULA SI EL SIMBOLO ESTA DIBUJADO CONSECUTIVAMETE,
+DE ESA MANERA PUEDO SABER SI YA SE DIBUJARON 3 SIMBOLOS CONSECUTIVOS POR EJEMPLO XXX o OOO,
+TANTO DIAGONAL, HORIZONAL Y VERTICAL.
+********************************************/
 int tiene_valores_consecutivos(int matriz_consecutivos[3][3],int tipoSimbolo);
-void enlazar_puerto(int descriptor, int puerto) ;
-void escuchar_clientes(int socket, int cantidad);
-void transferencia_datos(int client_fd);
-void ciclo_de_conexiones(int master_descriptor);
+
+
+
+
+/********************************************
+CON ESA FUNCION PUEDO CONECTARME AL SERVIDOR*
+*********************************************/
 void conectar();
+
+
+
+/************************************************
+ESA FUNCION ME PERMITE RECIBIR EL PAQUETE DE DATOS CORRESPONDIENTE
+A LAS COORDENADAS DEL BIBUJO QUE VOY A RECIBIR DE PARTE DEL SERVIDOR POR EJEMPLO: UNA X CON LOS PUNTOS (X,Y);
+******************************************************/
 void transferencia_datos_server();
+
+
+
+/************************************************
+ESTAS FUNCION ME SRIVE PARA ENVIAR Y RECIBIR BYTES A TRAVES DE LOS SOCKET
+******************************************************/
+
 int enviarPorSocket(int fdCliente, const void * mensaje, int tamanio);
 int recibirPorSocket(int fdCliente, void * buffer, int tamanio);
+
+
+/***********************************************************************************
+ESTA FUNCION ME AYUDA A ABSTRAERME DEL ENVIO DE PAQUETE,						   *
+ TANTO DE LAS COORDENADAS Y  EL TIPO DE SIMBOLO.								   *
+ RE UTILIZA LA FUNCIONES EnviarPorSocket y recibirPorSocket,  utilizo la estrucutra*
+ cabecera para enviarle el tipo y la cantidad de Bytes que necesita				   *
+************************************************************************************/
 void enviarPaquete(int fdCliente, int tipoMensaje, void * mensaje, int tamanioMensaje);
 void * recibirPaquete(int fdCliente, int * tipoMensaje, int * tamanioMensaje);
+
+
+
+/******************************************************************
+ESTAN FUNCIONES ME PERMITEN DIBUJAR EN LA IMAGEN, EL SIMBOLO X o O*
+*******************************************************************/
 void dibujar_O(Cuadrante cuadrante,CvArr* img1);
 void dibujar_x(Cuadrante cuadrante,CvArr* img1);
+
+/*********************************************************
+ESTA FUNCIONE ME CALCULA LAS COORDENADAS CORRESPONDIENTES*
+ PARA PODER DIBUJARLAS EN LA IMAGEN
+**********************************************************/
 Cuadrante calcular_cuadrante(int x, int y);
+
+
+/*********************************************************************************
+ESTA FUNCION DIBUJA EN EL CUADRANTE CORRESPONDIENTE EN FUNCION A LA QUE RECIBO DE*
+LA FUNCION calcular_cuadran(int, int). HAGO USO DE ESTA FUNCION CUANDO HAGO CLICK* 
+DONDE QUIERO DIBUJARLAS                                                          *
+**********************************************************************************/
 void dibujar_en_cuadrante(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo);
+
+/********************************************************************
+ES LA FUNCION, CONTIENE LA MISMA LOGICA, A DIFERENCIA QUE LA UTILIZO* 
+EN EL INSTANTE EN  QUE RECIBO LOS PAQUETES                                 *     
+*********************************************************************/
 void dibujar_en_cuadrante_desde_servidor(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo);
+
+
+/******************************************************************************
+CON ESTA FUNCION CALCULO LA COORDENADAS  CUANDO POSICIONO EL MOUSE
+
+******************************************************************************/
 void mouseHandler(int event, int x, int y, int flags, void* param);
 #endif /* CONEXIONES_H_ */

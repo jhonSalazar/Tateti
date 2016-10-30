@@ -21,96 +21,19 @@ int abrir_socket() {
 }
 
 
-void enlazar_puerto(int descriptor, int puerto) {
-	struct sockaddr_in server;
-	int reu = 1;
-	int true;
-	// re-utilizo el puerto
-	if (setsockopt(descriptor,SOL_SOCKET, SO_REUSEADDR, &reu,
-			sizeof(true)) < 0) {
-		perror("no es posible enlazar puerto: ");
-		exit(EXIT_FAILURE);
-	}
-	//seteo la estructura del server
-	memset(&server, 0, sizeof(server));
-	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = htonl(INADDR_ANY);
-	server.sin_port = htons(puerto);
-	//enlazamos el puerto
-	if (bind(descriptor, (struct sockaddr *) &server, sizeof(server)) == -1) {
-		perror("fallo en la funcion bind: ");
-		exit(EXIT_FAILURE);
-	}
-
-}
-
-void escuchar_clientes(int descriptor, int cantidad) {
-	//cantidad de clientes que deseo escuchar
-	if (listen(descriptor, cantidad) < 0){
-		perror("no se puede transmitir la cola de escucha: ");
-		exit(EXIT_FAILURE);
-	}
-
-}
-
-
-void transferencia_datos(int client_fd){
-int tamanio_enviar=1024;
-    char buffer[10241], enviar[1024];
-int num;
- while(1) {
-        if ((num = recv(client_fd, buffer, 10240,0))== -1) {
-            //fprintf(stderr,"Error in receiving message!!\n");
-            perror("recv");
-            exit(1);
-        }
-        else if (num == 0) {
-            printf("Connection closed\n");
-            exit(EXIT_FAILURE);
-        }
-    //  num = recv(client_fd, buffer, sizeof(buffer),0);
-        buffer[num] = '\0';
-        printf("Message received: %s\n", buffer);
-        printf("%s\n","enviar mensaje al jugador: " );
-
-        fgets(enviar,tamanio_enviar,stdin);
-
-        send(client_fd,enviar,tamanio_enviar,0);
-        }
-
-}
 
 
 
-void ciclo_de_conexiones(int socket_fd){
-struct sockaddr_in cliente;
-int client_fd;
-socklen_t size;
-
-    while(1) {
-        size = sizeof(struct sockaddr_in);
-
-        if ((client_fd = accept(socket_fd, (struct sockaddr *)&cliente, &size))==-1) {
-            //fprintf(stderr,"Accept Failure\n");
-            perror("accept\n");
-            exit(1);
-        }
-        printf("Server got connection from client %s\n", inet_ntoa(cliente.sin_addr));
-        //buffer = "Hello World!! I am networking!!\n";
-        	transferencia_datos(client_fd);
-
-        close(client_fd);
-        close(socket_fd);
-    }
 
 
-}
+
+
 
 void conectar(){
 	struct sockaddr_in server;
 	memset(&server, 0, sizeof(server));
 	server.sin_family = AF_INET;
-	server.sin_addr.s_addr=inet_addr("127.0.0.1");
+	server.sin_addr.s_addr=inet_addr(vg_ip);
 	server.sin_port = htons(PORT);
 
 	//client  connect to server on port
@@ -142,7 +65,7 @@ void transferencia_datos_server(){
 		{
 			memcpy(&vg_cuadrante,buffer,tamanioMensaje);
 			vg_simbolo_retador=tipoSimbolo;
-			dibujar_en_cuadrante_desde_servidor(vg_cuadrante,img1,vg_simbolo_retador);
+			dibujar_en_cuadrante_desde_servidor(vg_cuadrante,vg_img1,vg_simbolo_retador);
 			free(buffer);
 		}else{
 				close(vg_socket_fd);
@@ -224,6 +147,10 @@ void * recibirPaquete(int fdCliente, int * tipoMensaje, int * tamanioMensaje){
 	return NULL;
 }
 
+
+/*************************************************************************
+calculo si mi simbolo y la del retador ya tiene 3 cuadrantes consecutivos*
+**************************************************************************/
 int tiene_valores_consecutivos(int matriz_consecutivos[3][3],int tipoSimbolo)
 {
 
@@ -383,7 +310,9 @@ Cuadrante cuadrante;
 
 		//6to cuadrante
 
-		if((x>=200 && x<=285) &&(y>=105 && y<=194)){
+		if((x>=200 && x<=285) &&(y>=105 &&
+
+		 y<=194)){
 			cuadrante.x1=200;
 			cuadrante.x2=285;
 			cuadrante.y1=105;
@@ -433,7 +362,7 @@ Cuadrante cuadrante;
 void dibujar_O(Cuadrante cuadrante,CvArr* img1){
 
 	cvCircle(img1, cvPoint( (cuadrante.x1 + cuadrante.x2)/2,(cuadrante.y1 + cuadrante.y2)/2), RADIO	, CV_RGB(0,0,0), 2, CV_AA, 0);
-	cvShowImage(name, img1);
+	cvShowImage(vg_name, img1);
 
 }
 
@@ -442,7 +371,7 @@ void dibujar_O(Cuadrante cuadrante,CvArr* img1){
 		cvLine(img1, cvPoint(cuadrante.x1,cuadrante.y1),cvPoint(cuadrante.x2,cuadrante.y2), CV_RGB(0,0,0), 2, CV_AA , 0);
 							//x1,y2										//x2,y1
 		cvLine(img1, cvPoint(cuadrante.x1,cuadrante.y2),cvPoint(cuadrante.x2,cuadrante.y1), CV_RGB(0,0,0), 2, CV_AA , 0);
-		cvShowImage(name, img1);
+		cvShowImage(vg_name, img1);
 
 
  }
@@ -529,7 +458,7 @@ void mouseHandler(int event, int x, int y, int flags, void* param)
 	}
 	if(event == CV_EVENT_LBUTTONDOWN ){
 	vg_cuadrante=calcular_cuadrante(x,y);
- 	dibujar_en_cuadrante(vg_cuadrante,img1,vg_simbolo_jugador);
+ 	dibujar_en_cuadrante(vg_cuadrante,vg_img1,vg_simbolo_jugador);
  	tamanioMensaje=sizeof(Cuadrante);
 	buffer=malloc(tamanioMensaje);
 	memcpy(buffer,&vg_cuadrante,tamanioMensaje);

@@ -226,7 +226,7 @@ Cuadrante cuadrante;
 void dibujar_O(Cuadrante cuadrante,CvArr* img1){
 
 	cvCircle(img1, cvPoint( (cuadrante.x1 + cuadrante.x2)/2,(cuadrante.y1 + cuadrante.y2)/2), RADIO	, CV_RGB(0,0,0), 2, CV_AA, 0);
-	cvShowImage(name, img1);
+	cvShowImage(vg_name, img1);
 
 }
 
@@ -235,7 +235,7 @@ void dibujar_O(Cuadrante cuadrante,CvArr* img1){
 		cvLine(img1, cvPoint(cuadrante.x1,cuadrante.y1),cvPoint(cuadrante.x2,cuadrante.y2), CV_RGB(0,0,0), 2, CV_AA , 0);
 							//x1,y2										//x2,y1
 		cvLine(img1, cvPoint(cuadrante.x1,cuadrante.y2),cvPoint(cuadrante.x2,cuadrante.y1), CV_RGB(0,0,0), 2, CV_AA , 0);
-		cvShowImage(name, img1);
+		cvShowImage(vg_name, img1);
 
 
  }
@@ -366,7 +366,7 @@ void mouseHandler(int event, int x, int y, int flags, void* param)
 	}
 	if(event == CV_EVENT_LBUTTONDOWN ){
 	vg_cuadrante=calcular_cuadrante(x,y);
- 	dibujar_en_cuadrante(vg_cuadrante,img1,vg_simbolo_jugador);
+ 	dibujar_en_cuadrante(vg_cuadrante,vg_img1,vg_simbolo_jugador);
  	tamanioMensaje=sizeof(Cuadrante);
 	buffer=malloc(tamanioMensaje);
 	memcpy(buffer,&vg_cuadrante,tamanioMensaje);
@@ -400,7 +400,7 @@ int tipoSimbolo,tamanioMensaje;
 				memcpy(&vg_cuadrante,buffer,tamanioMensaje);
 				vg_simbolo_retador=tipoSimbolo;
 				//printf("x1:%d X2: %d \n",vg_cuadrante.x1,vg_cuadrante.x2 );
-				dibujar_en_cuadrante_desde_cliente(vg_cuadrante,img1,tipoSimbolo);
+				dibujar_en_cuadrante_desde_cliente(vg_cuadrante,vg_img1,tipoSimbolo);
 				free(buffer);
 
 			}else{
@@ -442,38 +442,8 @@ socklen_t size;
 
 }
 
-void conectar(int socket_fd){
-	struct sockaddr_in server;
-	memset(&server, 0, sizeof(server));
-	server.sin_family = AF_INET;
-	server.sin_addr.s_addr=inet_addr("127.0.0.1");
-	server.sin_port = htons(PORT);
-
-	//client  connect to server on port
-
-	if (connect(socket_fd, (struct sockaddr *) &server, sizeof(server)) == -1) {
-		perror("no me puedo conectar");
-		exit(1);
-	}
-    else
-    {
-    	
-    	transferencia_datos_server(socket_fd);
-    }
 
 
-}
-void transferencia_datos_server(int client_fd){
-int tamanio_enviar=1024;
- char  enviar[1024];
-
-	//	printf("%s", "enviar mensaje al servidor:  ");
-		fgets(enviar,tamanio_enviar,stdin);
-		send(client_fd,enviar,tamanio_enviar,0);
-		transferencia_datos( client_fd);
-
-
-}
 
 int enviarPorSocket(int fdCliente, const void * mensaje, int tamanio) {
 	int bytes_enviados;
