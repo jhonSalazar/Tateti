@@ -71,7 +71,7 @@ int num;
     //  num = recv(client_fd, buffer, sizeof(buffer),0);
         buffer[num] = '\0';
         printf("Message received: %s\n", buffer);
-        printf("%s","enviar mensaje al jugador: " );
+        printf("%s\n","enviar mensaje al jugador: " );
 
         fgets(enviar,tamanio_enviar,stdin);
 
@@ -92,7 +92,7 @@ socklen_t size;
 
         if ((client_fd = accept(socket_fd, (struct sockaddr *)&cliente, &size))==-1) {
             //fprintf(stderr,"Accept Failure\n");
-            perror("accept");
+            perror("accept\n");
             exit(1);
         }
         printf("Server got connection from client %s\n", inet_ntoa(cliente.sin_addr));
@@ -106,7 +106,7 @@ socklen_t size;
 
 }
 
-void conectar(int socket_fd){
+void conectar(){
 	struct sockaddr_in server;
 	memset(&server, 0, sizeof(server));
 	server.sin_family = AF_INET;
@@ -115,38 +115,34 @@ void conectar(int socket_fd){
 
 	//client  connect to server on port
 
-	if (connect(socket_fd, (struct sockaddr *) &server, sizeof(server)) == -1) {
-		perror("no me puedo conectar");
+	if (connect(vg_socket_fd, (struct sockaddr *) &server, sizeof(server)) == -1) {
+		perror("no me puedo conectar\n");
 		exit(1);
 	}
     else
     {
-    	printf("%s","enviar mensaje al servidor:");
-    	transferencia_datos_server(socket_fd);
+    	printf("%s","enviar mensaje al servidor:\n");
+    	transferencia_datos_server();
     }
 
 
 }
-void transferencia_datos_server(int servidor_fd){
-int tamanio_enviar=1024;
- char  enviar[1024];
- int tamanioMensaje,valor;
-valor=HS;
-tamanioMensaje=4;
 
-//memcpy(buffer,&valor,tamanioMensaje);
-//void* buffer;
-//memcpy(buffer,&valor,tamanioMensaje);
-	//	
-	//	fgets(enviar,tamanio_enviar,stdin);
-		enviarPaquete(servidor_fd,HS,&valor,tamanioMensaje);
-		//send(servidor_fd,enviar,tamanio_enviar,0);
-		//enum{HS=99,simbolo=2,coordenadas=3}
-		//void enviarPaquete(int fdCliente, int tipoMensaje, void * mensaje, int tamanioMensaje)
-		
-		
-		//transferencia_datos( servidor_fd);
 
+
+
+void transferencia_datos_server(){
+	int tipoSimbolo,tamanioMensaje;
+	void* buffer;
+	while(1){
+
+		sleep(1);
+		buffer =recibirPaquete(vg_socket_fd,&tipoSimbolo,&tamanioMensaje);
+		memcpy(&vg_cuadrante,buffer,tamanioMensaje);
+		dibujar_en_cuadrante(vg_cuadrante,img1,tipoSimbolo);
+		free(buffer);
+
+	}
 
 }
 
@@ -154,7 +150,7 @@ int enviarPorSocket(int fdCliente, const void * mensaje, int tamanio) {
 	int bytes_enviados;
 	int total = 0;
 
-	while (total < tamanio) {
+	while (total < tamanio){
 		bytes_enviados = send(fdCliente, mensaje + total, tamanio, 0);
 		if (bytes_enviados == FAIL) {
 			break;
@@ -198,6 +194,8 @@ void enviarPaquete(int fdCliente, int tipoMensaje, void * mensaje, int tamanioMe
 	enviarPorSocket(fdCliente, mensaje, nuevoMensaje.tamanio);
 }
 
+
+
 void * recibirPaquete(int fdCliente, int * tipoMensaje, int * tamanioMensaje){
 	cabeceraMensaje nuevoMensaje;
 	int recibido = recibirPorSocket(fdCliente, &nuevoMensaje, sizeof(cabeceraMensaje));
@@ -213,3 +211,199 @@ void * recibirPaquete(int fdCliente, int * tipoMensaje, int * tamanioMensaje){
 	}
 	return NULL;
 }
+
+
+Cuadrante calcular_cuadrante(int x, int y){
+
+Cuadrante cuadrante;
+//1er cuadrante
+	if((x>=18 && x<=107)&&(y>=16 && y <=105)){
+
+		cuadrante.x1=18;
+		cuadrante.x2=107;
+		cuadrante.y1=16;
+		cuadrante.y2=105;
+	}
+
+
+
+//2do cuadrante
+	if((x>=107 && x<=197) &&(y>=16 && y<= 105)){
+
+		cuadrante.x1=107;
+		cuadrante.x2=197;
+		cuadrante.y1=16;
+		cuadrante.y2=105;
+	}
+
+		
+		//tercer cuadrante
+	if((x>=197 && x<=285) &&(y>=16 && y<= 105)){
+		cuadrante.x1=197;
+		cuadrante.x2=285;
+		cuadrante.y1=16;
+		cuadrante.y2=105;
+	}
+
+		//cuarto cuadrante
+	if((x>=18 && x<=107) &&(y>=105 && y<= 194)){
+		cuadrante.x1=18;
+		cuadrante.x2=107;
+		cuadrante.y1=105;
+		cuadrante.y2=194;
+	}
+	
+
+		//5to cuadrante
+		if((x>=107 && x<=200) &&(y>=105 && y<=194)){
+			cuadrante.x1=107;
+			cuadrante.x2=200;
+			cuadrante.y1=105;
+			cuadrante.y2=194;
+		}
+
+		//6to cuadrante
+
+		if((x>=200 && x<=285) &&(y>=105 && y<=194)){
+			cuadrante.x1=200;
+			cuadrante.x2=285;
+			cuadrante.y1=105;
+			cuadrante.y2=194;
+		}
+
+		//7to cuadrante
+
+		if((x>=18 && x<=107) &&(y>=194 && y<=285)){
+			cuadrante.x1=18;
+			cuadrante.x2=107;
+			cuadrante.y1=194;
+			cuadrante.y2=285;
+		}
+
+		//8to cuadrante
+
+		if((x>=107 && x<=200) &&(y>=194 && y<=285)){
+			cuadrante.x1=107;
+			cuadrante.x2=200;
+			cuadrante.y1=194;
+			cuadrante.y2=285;
+		}
+
+		//9to cuadrante
+
+		if((x>=200 && x<=285) &&(y>=194 && y<=285)){
+			cuadrante.x1=200;
+			cuadrante.x2=285;
+			cuadrante.y1=194;
+			cuadrante.y2=285;
+		}
+
+
+
+		return cuadrante;
+}
+
+void dibujar_O(Cuadrante cuadrante,CvArr* img1){
+
+	cvCircle(img1, cvPoint( (cuadrante.x1 + cuadrante.x2)/2,(cuadrante.y1 + cuadrante.y2)/2), RADIO	, CV_RGB(0,0,0), 2, CV_AA, 0);
+	cvShowImage(name, img1);
+
+}
+
+ void dibujar_x(Cuadrante cuadrante,CvArr* img1){
+ 							//x1,y1										//x2,y2
+		cvLine(img1, cvPoint(cuadrante.x1,cuadrante.y1),cvPoint(cuadrante.x2,cuadrante.y2), CV_RGB(0,0,0), 2, CV_AA , 0);
+							//x1,y2										//x2,y1
+		cvLine(img1, cvPoint(cuadrante.x1,cuadrante.y2),cvPoint(cuadrante.x2,cuadrante.y1), CV_RGB(0,0,0), 2, CV_AA , 0);
+		cvShowImage(name, img1);
+
+
+ }
+
+ void dibujar_en_cuadrante(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo){
+
+ 
+		switch(tipoSimbolo)
+		{
+
+			case circulo:
+			dibujar_O(cuadrante ,img1);
+			break;
+
+			case X:
+			dibujar_x(cuadrante,img1);
+			break;
+
+			default:
+				printf("%s\n","bla bla bla bla bla bla\n");
+			return;
+
+		}
+
+
+}
+void mouseHandler(int event, int x, int y, int flags, void* param)
+{	
+	void* buffer;
+	int tamanioMensaje;
+	if (event != CV_EVENT_LBUTTONDOWN)
+	{	
+	//void * recibirPaquete(int fdCliente, int * tipoMensaje, int * tamanioMensaje);	
+		/*sleep(2);
+		buffer =recibirPaquete(vg_socket_fd,&tipoMensaje,&tamanioMensaje);
+		memcpy(&vg_cuadrante,buffer,tamanioMensaje);
+		dibujar_en_cuadrante(vg_cuadrante,img1);
+		free(buffer);*/
+		//
+
+
+	}
+	if(event == CV_EVENT_LBUTTONDOWN ){
+	vg_cuadrante=calcular_cuadrante(x,y);
+ 	dibujar_en_cuadrante(vg_cuadrante,img1,vg_simbolo_jugador);
+ 	tamanioMensaje=sizeof(Cuadrante);
+	buffer=malloc(tamanioMensaje);
+	memcpy(buffer,&vg_cuadrante,tamanioMensaje);
+	enviarPaquete(vg_socket_fd,vg_simbolo_jugador,buffer,tamanioMensaje);
+	free(buffer);
+	printf("se cargaron las corrdenadas x1:%d x2:%d \n",vg_cuadrante.x1,vg_cuadrante.x2);
+ 	
+ 	
+	}
+	
+	
+}
+/*
+
+tamanioMensaje=sizeof(vg_cuadrante);
+ 	buffer=malloc(tamanioMensaje);
+ 	memcpy(buffer,&vg_cuadrante,tamanioMensaje);
+ //enviarPaquete(int fdCliente, int tipoMensaje, void * mensaje, int tamanioMensaje	
+
+
+ 	enviarPaquete(vg_socket_fd,dibujar,buffer,tamanioMensaje);
+ 	free(buffer);
+ 	
+
+
+*/
+
+/*
+
+tamanioMensaje=sizeof(vg_cuadrante);
+ 		buffer=malloc(tamanioMensaje);
+ 		memcpy(buffer,&vg_cuadrante,tamanioMensaje);
+ //enviarPaquete(int fdCliente, int tipoMensaje, void * mensaje, int tamanioMensaje	
+
+ 		enviarPaquete(vg_socket_fd,dibujar,buffer,tamanioMensaje);
+ 		free(buffer);
+
+
+
+
+		buffer =recibirPaquete(vg_socket_fd,&tipoMensaje,&tamanioMensaje);
+		memcpy(&vg_cuadrante,buffer,tamanioMensaje);
+		dibujar_en_cuadrante(vg_cuadrante,img1);
+		free(buffer);
+
+*/

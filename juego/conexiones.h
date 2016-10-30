@@ -25,11 +25,13 @@
 #define FAIL -1
 #define MAX_ENVIAR_DATOS 1025
 #define TRUE 1
+ #define RADIO 40
+
+#define ESC_KEY 27
 
 //variables globales
-int vg_simbolo_jugador;
-IplImage* img1;
-char* name;
+
+
 
 typedef enum
 {	
@@ -39,8 +41,16 @@ typedef enum
 	estas_aceptado=4,
 	elegir_simbolo=5,
 	recibo_simbolo=6,
+	dibujar=7
 }protocolo;
 //struct
+
+typedef struct ccc{
+	int x1;
+	int x2;
+	int y1;
+	int y2;
+}Cuadrante;
 
  typedef struct 
 {
@@ -51,13 +61,25 @@ typedef enum
  /*
 devuelve un descriptor para poder comunicarse con el cliente;
  */
-
-
+int vg_socket_fd;
+int vg_cliente_fd;
+Cuadrante vg_cuadrante;
+int vg_simbolo_jugador;
+IplImage* img1;
+char* name;
+typedef enum {circulo=1,X=2}tipo_simbolo;
+ IplImage* img ; 
+ char key;
 //prototipos.....
+void dibujar_O(Cuadrante cuadrante,CvArr* img1);
+ void dibujar_x(Cuadrante cuadrante,CvArr* img1);
+ Cuadrante calcular_cuadrante(int x, int y);
+ void dibujar_en_cuadrante(Cuadrante cuadrante,CvArr* img1,int tipo_simbolo);
 int abrir_socket();
 void enlazar_puerto(int descriptor, int puerto) ;
 void escuchar_clientes(int socket, int cantidad);
-void transferencia_datos(int client_fd);
+void mouseHandler(int event, int x, int y, int flags, void* param);
+void transferencia_datos();
 void ciclo_de_conexiones(int master_descriptor);
 void conectar(int socket_fd);
 void transferencia_datos_server(int client_fd);
