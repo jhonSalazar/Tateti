@@ -11,90 +11,211 @@
 
 #include <string.h>
 
+int tiene_valores_consecutivos(int matriz_consecutivos[3][3],int tipoSimbolo)
+{
+
+	// calculo horizontal vg_simbolo_retador
+	if(matriz_consecutivos[0][0] == tipoSimbolo && matriz_consecutivos[0][1] == tipoSimbolo && matriz_consecutivos[0][2] == tipoSimbolo)
+		return 1;
+	if(matriz_consecutivos[0][0] == vg_simbolo_retador && matriz_consecutivos[0][1] == vg_simbolo_retador && matriz_consecutivos[0][2] == vg_simbolo_retador)
+		return 1;
+
+	if(matriz_consecutivos[1][0] == tipoSimbolo && matriz_consecutivos[1][1] == tipoSimbolo && matriz_consecutivos[1][2] == tipoSimbolo)
+		return 1;
+
+	if(matriz_consecutivos[1][0] == vg_simbolo_retador && matriz_consecutivos[1][1] == vg_simbolo_retador && matriz_consecutivos[1][2] == vg_simbolo_retador)
+		return 1;
+
+	if(matriz_consecutivos[2][0] == tipoSimbolo && matriz_consecutivos[2][1] == tipoSimbolo && matriz_consecutivos[2][2] == tipoSimbolo)
+		return 1;
+
+	if(matriz_consecutivos[2][0] == vg_simbolo_retador && matriz_consecutivos[2][1] == vg_simbolo_retador && matriz_consecutivos[2][2] == vg_simbolo_retador)
+		return 1;
+//fin de caculo horizontal
+
+	//calculo vertical vg_simbolo_retador
+
+	if(matriz_consecutivos[0][0] == tipoSimbolo && matriz_consecutivos[1][0] == tipoSimbolo && matriz_consecutivos[2][0] == tipoSimbolo)
+		return 1;
+
+	if(matriz_consecutivos[0][0] == vg_simbolo_retador && matriz_consecutivos[1][0] == vg_simbolo_retador && matriz_consecutivos[2][0] == vg_simbolo_retador)
+		return 1;
+
+
+	if(matriz_consecutivos[0][1] == tipoSimbolo && matriz_consecutivos[1][1] == tipoSimbolo && matriz_consecutivos[2][1] == tipoSimbolo)
+		return 1;
+
+	if(matriz_consecutivos[0][1] == vg_simbolo_retador && matriz_consecutivos[1][1] == vg_simbolo_retador && matriz_consecutivos[2][1] == vg_simbolo_retador)
+		return 1;
+
+
+	if(matriz_consecutivos[0][2] == tipoSimbolo && matriz_consecutivos[1][2] == tipoSimbolo && matriz_consecutivos[2][2] == tipoSimbolo)
+		return 1;
+
+	//fin de calculo vertical
+
+	//calculo diagonal vg_simbolo_retador
+	if(matriz_consecutivos[0][0] == tipoSimbolo && matriz_consecutivos[1][1] == tipoSimbolo && matriz_consecutivos[2][2] == tipoSimbolo)
+		return 1;
+
+	if(matriz_consecutivos[0][0] == vg_simbolo_retador && matriz_consecutivos[1][1] == vg_simbolo_retador && matriz_consecutivos[2][2] == vg_simbolo_retador)
+		return 1;
+
+	if(matriz_consecutivos[0][2] == tipoSimbolo && matriz_consecutivos[1][1] == tipoSimbolo && matriz_consecutivos[2][0] == tipoSimbolo)
+		return 1;
+
+	if(matriz_consecutivos[0][2] == vg_simbolo_retador && matriz_consecutivos[1][1] == vg_simbolo_retador && matriz_consecutivos[2][0] == vg_simbolo_retador)
+		return 1;
+
+
+	//fin de calculo diagonal
+
+	//caso que no tenga ningun lugar consecutivo
+	return 0;
+
+}
+
+
+
+
+int dibujo_segun_estado(int matriz_estados[3][3],int matriz_consecutivos[3][3],int tipoSimbolo,Cuadrante cuadrante ){
+
+	
+	if(!tiene_valores_consecutivos(matriz_consecutivos,tipoSimbolo))
+	{
+					if(matriz_estados[cuadrante.pos1][cuadrante.pos2] == 1 )
+					{
+						matriz_consecutivos[cuadrante.pos1][cuadrante.pos2]=tipoSimbolo;
+						matriz_estados[cuadrante.pos1][cuadrante.pos2]= 0;
+						return 1;
+					}
+					else
+					{
+
+						//	puts("elegir otro cuadrante para dibujar, este ya esta ocupado;\n");
+						return 0;
+
+					}
+				
+	
+
+	}else{
+
+		printf("el juego ha terminado, Loser!!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	return 0;
+			
+
+
+}
 
  Cuadrante calcular_cuadrante(int x, int y){
 
 Cuadrante cuadrante;
 //1er cuadrante
-	if((x>=18 && x<=107)&&(y>=16 && y <=105)){
 
-		cuadrante.x1=18;
-		cuadrante.x2=107;
-		cuadrante.y1=16;
-		cuadrante.y2=105;
-	}
+	if((x>=C1_X1 && x<=C1_X2)&&(y>=C1_Y1 && y <=C1_Y2)){
+
+		cuadrante.x1=C1_X1;
+		cuadrante.x2=C1_X2;
+		cuadrante.y1=C1_Y1;
+		cuadrante.y2=C1_Y2;
+		cuadrante.pos1=0;
+		cuadrante.pos2=0;
+
+
+		}
+	
 
 
 
 //2do cuadrante
-	if((x>=107 && x<=197) &&(y>=16 && y<= 105)){
+	if((x>=C2_X1 && x<=C2_X2) &&(y>=C2_Y1 && y<= C2_Y2)){
 
-		cuadrante.x1=107;
-		cuadrante.x2=197;
-		cuadrante.y1=16;
-		cuadrante.y2=105;
+		cuadrante.x1=C2_X1;
+		cuadrante.x2=C2_X2;
+		cuadrante.y1=C2_Y1;
+		cuadrante.y2=C2_Y2;
+		cuadrante.pos1=0;
+		cuadrante.pos2=1;
 	}
 
-		
+	
 		//tercer cuadrante
-	if((x>=197 && x<=285) &&(y>=16 && y<= 105)){
-		cuadrante.x1=197;
-		cuadrante.x2=285;
-		cuadrante.y1=16;
-		cuadrante.y2=105;
+	if((x>=C3_X1 && x<=C3_X2) &&(y>=C3_Y1 && y<= C3_Y2)){
+		cuadrante.x1=C3_X1;
+		cuadrante.x2=C3_X2;
+		cuadrante.y1=C3_Y1;
+		cuadrante.y2=C3_Y2;
+		cuadrante.pos1=0;
+		cuadrante.pos2=2;
 	}
-
+	
 		//cuarto cuadrante
-	if((x>=18 && x<=107) &&(y>=105 && y<= 194)){
-		cuadrante.x1=18;
-		cuadrante.x2=107;
-		cuadrante.y1=105;
-		cuadrante.y2=194;
+	if((x>=C4_X1 && x<=C4_X2) &&(y>=C4_Y1 && y<= C4_Y2)){
+		cuadrante.x1=C4_X1;
+		cuadrante.x2=C4_X2;
+		cuadrante.y1=C4_Y1;
+		cuadrante.y2=C4_Y2;
+		cuadrante.pos1=1;
+		cuadrante.pos2=0;
 	}
 	
 
 		//5to cuadrante
-		if((x>=107 && x<=200) &&(y>=105 && y<=194)){
-			cuadrante.x1=107;
-			cuadrante.x2=200;
-			cuadrante.y1=105;
-			cuadrante.y2=194;
+		if((x>=C5_X1 && x<=C5_X2) &&(y>=C5_Y1 && y<=C5_Y2)){
+			cuadrante.x1=C5_X1;
+			cuadrante.x2=C5_X2;
+			cuadrante.y1=C5_Y1;
+			cuadrante.y2=C5_Y2;
+			cuadrante.pos1=1;
+			cuadrante.pos2=1;
 		}
 
 		//6to cuadrante
-
-		if((x>=200 && x<=285) &&(y>=105 && y<=194)){
-			cuadrante.x1=200;
-			cuadrante.x2=285;
-			cuadrante.y1=105;
-			cuadrante.y2=194;
+	
+		if((x>=C6_X1 && x<=C6_X2) &&(y>=C6_Y1 && y<=C6_Y2)){
+			cuadrante.x1=C6_X1;
+			cuadrante.x2=C6_X2;
+			cuadrante.y1=C6_Y1;
+			cuadrante.y2=C6_Y2;
+			cuadrante.pos1=1;
+			cuadrante.pos2=2;
 		}
 
 		//7to cuadrante
-
-		if((x>=18 && x<=107) &&(y>=194 && y<=285)){
-			cuadrante.x1=18;
-			cuadrante.x2=107;
-			cuadrante.y1=194;
-			cuadrante.y2=285;
+	
+		if((x>=C7_X1 && x<=C7_X2) &&(y>=C7_Y1 && y<=C7_Y2)){
+			cuadrante.x1=C7_X1;
+			cuadrante.x2=C7_X2;
+			cuadrante.y1=C7_Y1;
+			cuadrante.y2=C7_Y2;
+			cuadrante.pos1=2;
+			cuadrante.pos2=0;
 		}
 
 		//8to cuadrante
-
-		if((x>=107 && x<=200) &&(y>=194 && y<=285)){
-			cuadrante.x1=107;
-			cuadrante.x2=200;
-			cuadrante.y1=194;
-			cuadrante.y2=285;
+	
+		if((x>=C8_X1 && x<=C8_X2) &&(y>=C8_Y1 && y<=C8_Y2)){
+			cuadrante.x1=C8_X1;
+			cuadrante.x2=C8_X2;
+			cuadrante.y1=C8_Y1;
+			cuadrante.y2=C8_Y2;
+			cuadrante.pos1=2;
+			cuadrante.pos2=1;
 		}
 
 		//9to cuadrante
-
-		if((x>=200 && x<=285) &&(y>=194 && y<=285)){
-			cuadrante.x1=200;
-			cuadrante.x2=285;
-			cuadrante.y1=194;
-			cuadrante.y2=285;
+		
+		if((x>=C9_X1 && x<=C9_X2) &&(y>=C9_Y1 && y<=C9_Y2)){
+			cuadrante.x1=C9_X1;
+			cuadrante.x2=C9_X2;
+			cuadrante.y1=C9_Y1;
+			cuadrante.y2=C9_Y2;
+			cuadrante.pos1=2;
+			cuadrante.pos2=2;
 		}
 
 
@@ -119,27 +240,72 @@ void dibujar_O(Cuadrante cuadrante,CvArr* img1){
 
  }
 
- void dibujar_en_cuadrante(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo){
-
- 
-	//printf("MOUSE(): CLICK IZQUIERDO ...\n");
-	//printf("FILA (y) = %d    COL (x) = %d \n",y,x);
-	  //img1 = cvCloneImage(img); 
-	//cvCircle(img1, cvPoint( (pt1.x + pt2.x)/2,(pt1.y + pt2.y)/2), 40, CV_RGB(0,0,0), -1, CV_AA, 0);
-	//int centro=(pt1.x + pt2.x)/2;
+ void dibujar_en_cuadrante(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo)
+ {
 		switch(tipoSimbolo)
 		{
 
-			case circulo:
-			dibujar_O(cuadrante ,img1);
-			break;
+			case circulo:		if(dibujo_segun_estado(matriz_estados,matriz_consecutivos,tipoSimbolo,cuadrante)){
 
-			case X:
-			dibujar_x(cuadrante,img1);
-			break;
+									dibujar_O(cuadrante ,img1);
+									break;
+									}
+							
+								
+							
+							
+							
+
+			case X:			if(dibujo_segun_estado(matriz_estados,matriz_consecutivos,tipoSimbolo,cuadrante)){
+								dibujar_x(cuadrante,img1);
+								break;
+
+							}
+						
+						
+						
+						
+					
 
 			default:
-				printf("%s\n","bla bla bla bla bla bla\n");
+				printf("%s\n","Por favor elija un cuadrante disponible, este ya no lo esta\n");
+			return;
+
+		}
+
+
+}
+
+void dibujar_en_cuadrante_desde_cliente(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo)
+ {
+		switch(tipoSimbolo)
+		{
+
+			case circulo:		if(dibujo_segun_estado(matriz_estados,matriz_consecutivos,tipoSimbolo,cuadrante)){
+
+									dibujar_O(cuadrante ,img1);
+									break;
+									}
+							
+								
+							
+							
+							
+
+			case X:			if(dibujo_segun_estado(matriz_estados,matriz_consecutivos,tipoSimbolo,cuadrante)){
+								dibujar_x(cuadrante,img1);
+								break;
+
+							}
+						
+						
+						
+						
+						
+					
+
+			default:
+				printf("%s\n","Tu companiero intento dibujar en un lugar no correspondiente, esperalo a que intente de nuevo.....\n");
 			return;
 
 		}
@@ -206,7 +372,7 @@ void mouseHandler(int event, int x, int y, int flags, void* param)
 	memcpy(buffer,&vg_cuadrante,tamanioMensaje);
 	enviarPaquete(vg_cliente_fd,vg_simbolo_jugador,buffer,tamanioMensaje);
 	free(buffer);
-	printf("se cargaron las corrdenadas x1:%d x2:%d \n",vg_cuadrante.x1,vg_cuadrante.x2);
+	//printf("se cargaron las corrdenadas x1:%d x2:%d \n",vg_cuadrante.x1,vg_cuadrante.x2);
  
  	
  	
@@ -230,12 +396,18 @@ int tipoSimbolo,tamanioMensaje;
 			buffer=recibirPaquete(vg_cliente_fd,&tipoSimbolo,&tamanioMensaje);
 			if(buffer !=NULL)
 			{
+				//printf("coordenadas obtenidas para dibujar\n");
 				memcpy(&vg_cuadrante,buffer,tamanioMensaje);
-				dibujar_en_cuadrante(vg_cuadrante,img1,tipoSimbolo);
+				vg_simbolo_retador=tipoSimbolo;
+				//printf("x1:%d X2: %d \n",vg_cuadrante.x1,vg_cuadrante.x2 );
+				dibujar_en_cuadrante_desde_cliente(vg_cuadrante,img1,tipoSimbolo);
 				free(buffer);
 
 			}else{
-				//printf("%s\n","no llegaron las coordenadas correspondientes" );
+				close(vg_cliente_fd);
+				printf("%s\n","El juego ha terminado Winner!!");
+				exit(EXIT_FAILURE);
+				
 				return;
 			}
 
@@ -295,7 +467,7 @@ void transferencia_datos_server(int client_fd){
 int tamanio_enviar=1024;
  char  enviar[1024];
 
-		printf("%s", "enviar mensaje al servidor:  ");
+	//	printf("%s", "enviar mensaje al servidor:  ");
 		fgets(enviar,tamanio_enviar,stdin);
 		send(client_fd,enviar,tamanio_enviar,0);
 		transferencia_datos( client_fd);
@@ -354,8 +526,8 @@ void * recibirPaquete(int fdCliente, int * tipoMensaje, int * tamanioMensaje){
 	cabeceraMensaje nuevoMensaje;
 	int recibido = recibirPorSocket(fdCliente, &nuevoMensaje, sizeof(cabeceraMensaje));
 	if (recibido > 0) {
-		printf("tamanio de mensaje:%d\n", nuevoMensaje.tamanio);
-		printf("el tipo del mensaje %d\n",nuevoMensaje.tipo );
+		//printf("tamanio de mensaje:%d\n", nuevoMensaje.tamanio);
+		//printf("el tipo del mensaje %d\n",nuevoMensaje.tipo );
 		void * buffer = malloc(nuevoMensaje.tamanio);
 		recibido = recibirPorSocket(fdCliente, buffer, nuevoMensaje.tamanio);
 		

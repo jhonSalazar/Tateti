@@ -39,13 +39,26 @@ void* jugar_con_servidor(void* param){
 
 int main(int argc, char *argv[])
 {
+	int i,j;
 	RADIO=40;
 	vg_simbolo_jugador=2;
-	vg_cuadrante.x1=0;
+	vg_simbolo_retador=0;
   	name=argv[1];
   	img = 0; 
  	img1 = 0; 
-   	pthread_t  p_thread;
+  	name=argv[1];
+  	pthread_t  p_thread;
+
+
+
+
+  	for(i=0;i<3;i++){
+  		for(j=0;j<3;j++){
+  			matriz_estados[i][j]=1;
+  			matriz_consecutivos[i][j]=8;
+  		}
+  	}
+	
 	
 
   if(argc<2){    printf("Usage: hello_world <image-file-name>\n\7");    exit(0);  }

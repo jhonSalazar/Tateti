@@ -30,33 +30,35 @@
 //variables globales
 
 //
+
+ /**********************************************
+MATRIZ DE ESTADOS 1 esta libre y 0 esta ocupado. por el momento todos estan libres;
+******************************************************/
+int matriz_estados[3][3];
+int matriz_consecutivos[3][3];
+
 int RADIO;
 int vg_socket_fd;
 typedef enum {circulo=1,X=2}tipo_simbolo;
 int vg_simbolo_jugador;
+int vg_simbolo_retador;
  IplImage* img; 
  IplImage* img1; 
  int socket_fd;
  char* name;
+
 char key;
  typedef struct ccc{
 	int x1;
 	int x2;
 	int y1;
 	int y2;
+	int pos1;
+	int pos2;
 }Cuadrante;
 
 Cuadrante vg_cuadrante;
-enum
-{	
-	HS=99,
-	simbolo=2,
-	coordenadas=3,
-	estas_aceptado=4,
-	elegir_simbolo=5,
-	envio_simbolo=6,
-	dibujar=7
-};
+
 
 //estructuras
 typedef struct 
@@ -72,6 +74,8 @@ devuelve un descriptor para poder comunicarse con el cliente;
 
 //prototipos.....
 int abrir_socket();
+int dibujo_segun_estado(int matriz_estados[3][3],int matriz_consecutivos[3][3],int tipoSimbolo,Cuadrante cuadrante);
+int tiene_valores_consecutivos(int matriz_consecutivos[3][3],int tipoSimbolo);
 void enlazar_puerto(int descriptor, int puerto) ;
 void escuchar_clientes(int socket, int cantidad);
 void transferencia_datos(int client_fd);
@@ -86,5 +90,6 @@ void dibujar_O(Cuadrante cuadrante,CvArr* img1);
 void dibujar_x(Cuadrante cuadrante,CvArr* img1);
 Cuadrante calcular_cuadrante(int x, int y);
 void dibujar_en_cuadrante(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo);
+void dibujar_en_cuadrante_desde_servidor(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo);
 void mouseHandler(int event, int x, int y, int flags, void* param);
 #endif /* CONEXIONES_H_ */

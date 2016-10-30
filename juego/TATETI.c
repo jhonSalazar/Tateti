@@ -9,8 +9,8 @@
  */
 //compilar con estos parametros
  //gcc -o juego conexiones.c TATETI.c $(pkg-config --cflags --libs opencv) -Wall -lpthread
-// y para ejecutar ./jugador  /home/jhon/cuadrago.jpg
- //ese path del archivo.juego  es relativo depende mucho del lugar donde uds lo guarden
+// y para ejecutar ./juego  /home/jhon/cuadrago.jpg
+ //ese path del la imagen es relativo, depende mucho del lugar donde uds lo guarden
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -44,39 +44,29 @@ void* jugar_con_cliente(void* param){
     	 ciclo_de_conexiones(vg_socket_fd);
 return NULL;
 }
+
+
 int main(int argc, char *argv[])
 {
+	int i,j;
 	vg_simbolo_jugador=1;
-	vg_cuadrante.x1=0;///uso para controlar
+	
   	name=argv[1];
   	pthread_t  p_thread;
+  	for(i=0;i<3;i++){
+  		for(j=0;j<3;j++){
+  			matriz_estados[i][j]=1;
+        matriz_consecutivos[i][j]=5;
 
-	
-  
-  // Defino el punto (pixel) inicial del rectangulo (arriba a la izquierda)
-	
- // uchar *data;
-//  int i,j,k;
-
-	
-
-
+  		}
+  	}
   if(argc<2){    printf("Usage: hello_world <image-file-name>\n\7");    exit(0);  }
-  // load an image  
-  //CvMat*
+
   img=cvLoadImage(argv[1],3);
    img1 = cvCloneImage(img); 
 
   if(!img){    printf("Could not load image file: %s\n",argv[1]);    exit(0);  }
-  // get the image data
-  //height    = img->height;
-  //width     = img->width;
-  //step      = img->widthStep;
-  //channels  = img->nChannels;
-  //data      = (uchar *)img->imageData;
- // printf("Processing a %dx%d image with %d channels\n",height,width,channels); 
- 
-  // create a window
+
   	
   
   cvNamedWindow(argv[1], CV_WINDOW_AUTOSIZE);
@@ -86,20 +76,8 @@ int main(int argc, char *argv[])
  	
 	pthread_create(&p_thread, NULL, &jugar_con_cliente, NULL);
   	
-	// Lazo infinito. Sale cuando presiono la tecla ESCAPE
-	
-	//pthread_join(p_thread,NULL);
   cvShowImage(name, img);
   	while(1){
-
-		// cvWaitKey me devuelve el ASCII de la tecla presionada
-		// El valor pasado es el tiempo en milisegundos que esperarÃ¡ por una tecla
-		// Si le paso 0 (cero) se bloquearÃ¡ hasta que se presione cualquier tecla
-		//sleep(2);
-	//	buffer =recibirPaquete(vg_cliente_fd,&tipoMensaje,&tamanioMensaje);
-	//	memcpy(&vg_cuadrante,buffer,tamanioMensaje);
-	//	dibujar_en_cuadrante(vg_cuadrante,img1);
-	//	free(buffer);
 
 		key = cvWaitKey(20);
 		if(key== ESC_KEY) 
