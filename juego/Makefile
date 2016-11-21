@@ -1,23 +1,22 @@
-OPEN= $(pkg-config --cflags --libs opencv) -Wall
-CC=gcc
+OPENCV_LIBS = `pkg-config --cflags --libs opencv`
+THREADS_LIBS = -lpthread
 
-juego: TATETI.o conexiones.o
-		$(CC) TATETI.o conexiones.o $(pkg-config --cflags --libs opencv) -Wall -o juego
+all: juego
 
+juego: conexiones.o TATETI.o 
+		gcc TATETI.o conexiones.o  -o juego $(OPENCV_LIBS) $(THREADS_LIBS) -Wall
 
-TATETI.o:TATETI.c  conexiones.h
-			$(CC) -c  TATETI.c $(pkg-config --cflags --libs opencv) -Wall
+TATETI.o: TATETI.c conexiones.h 
+			gcc -c TATETI.c -o TATETI.o $(OPENCV_LIBS) $(THREADS_LIBS) -Wall
 
-
-
-conexiones.o: conexiones.c conexiones.h
-			$(CC) -c   conexiones.c
-
+conexiones.o: conexiones.c conexiones.h 
+				gcc -c conexiones.c -o conexiones.o $(OPENCV_LIBS) $(THREADS_LIBS) -Wall
 
 
+clean: 
+	rm -f *.o
+	rm -f juego
+#valgrind --leak-check=full
+run:	juego
+	 ./juego servidor.jpg
 
-
-
-clean:
-		rm ­f ./*.o
-		rm ­f juego

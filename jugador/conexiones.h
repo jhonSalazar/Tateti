@@ -9,6 +9,7 @@
 #define CONEXIONES_H_
 #include <stdio.h>
 #include <stdlib.h>
+ #include <pthread.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
@@ -27,6 +28,7 @@
 #define MAXSIZE 1024
 #define ESC_KEY 27
  #define RADIO 40
+ #define POSICION_ERRONEA -1
 
 //variables globales
 
@@ -40,25 +42,32 @@
 	int pos2;
 }Cuadrante;
 
+typedef struct Nodo_registro{
 
+	char jugadas[50];
+	int simbolo;
+	char nombre[20];
+
+}t_nodo;
 typedef struct 
 {
 	int tipo;
 	int tamanio;
 
 }cabeceraMensaje;
-typedef enum {circulo=1,X=2}tipo_simbolo;
+typedef enum {circulo=1,X=2,empate=3,gane=4,perdi=5,fuera_del_rango=6,simbolo_elegido=7,tu_turno=8,nombre=9}tipo_simbolo;
 
 
 
 
 //variables globales nomen clatura vg de variable global
 int vg_socket_fd;
-
+int vg_empate;
 char* vg_ip;
 int vg_simbolo_jugador;
 int vg_simbolo_retador;
 IplImage* vg_img; 
+int vg_turno;
 IplImage* vg_img1; 
 char* vg_name;
 char vg_key;
@@ -73,10 +82,26 @@ int matriz_estados[3][3];
 //sirve para calcular si todos los cuadrantes consecutivos tiene el mismo simbolo
 int matriz_consecutivos[3][3];
 
+/***************************************
+INICIALIZA LAS MATRICES
+******************************************/
+void cargar_matrices();
+
+/*********************************************************
+IMRPIME LA BARRA DE PORCENTAJE
+***********************************************************/
+void barra_procentaje();
+
+
+
+int estafueraDelRango(Cuadrante cuadrante);
+
+
 
 
 //prototipos.....
-/***************************
+/*************************************************************
+int abrir_socket();
 DEVUELVO UN DESCRIPTOR PARA PODER COMUNICARME CON EL SERVIDOR
 ******************************/
 int abrir_socket();
@@ -126,7 +151,7 @@ int recibirPorSocket(int fdCliente, void * buffer, int tamanio);
 /***********************************************************************************
 ESTA FUNCION ME AYUDA A ABSTRAERME DEL ENVIO DE PAQUETE,						   *
  TANTO DE LAS COORDENADAS Y  EL TIPO DE SIMBOLO.								   *
- RE UTILIZA LA FUNCIONES EnviarPorSocket y recibirPorSocket,  utilizo la estrucutra*
+ RE UTILIZA LA FUNCIONES EnviarPorSocket y recibirPorSocket. Utilizo la estrucutra *
  cabecera para enviarle el tipo y la cantidad de Bytes que necesita				   *
 ************************************************************************************/
 void enviarPaquete(int fdCliente, int tipoMensaje, void * mensaje, int tamanioMensaje);

@@ -8,8 +8,33 @@
 
 
 #include "conexiones.h"
+ #include <cv.h>
+#include <highgui.h>
+ #include <pthread.h>
+void cargar_matrices(){
+int i,j;
+	for(i=0;i<3;i++){
+  		for(j=0;j<3;j++){
+  			matriz_estados[i][j]=1;
+  			matriz_consecutivos[i][j]=8;
+  		}
+  	}
+}
+void barra_procentaje(){
 
+			int p;
+  	     for(p = 0; p <= 100; p++)
+    {
+        int h;
+        for(h = 0; h <= h/10; h++)
+            printf("\rConectandose con el servidor.........................%d%s",p,"%");
+         	fflush(stdout);
+      		 usleep(100000);
+      
+    }
 
+    puts("\n");
+}
 int abrir_socket() {
 
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -57,23 +82,85 @@ void conectar(){
 void transferencia_datos_server(){
 	int tipoSimbolo,tamanioMensaje;
 	void* buffer;
+	
 	while(1){
 
 		
 		buffer =recibirPaquete(vg_socket_fd,&tipoSimbolo,&tamanioMensaje);
 		if(buffer != NULL)
-		{
-			memcpy(&vg_cuadrante,buffer,tamanioMensaje);
-			vg_simbolo_retador=tipoSimbolo;
-			dibujar_en_cuadrante_desde_servidor(vg_cuadrante,vg_img1,vg_simbolo_retador);
-			free(buffer);
-		}else{
-				close(vg_socket_fd);
-				printf("%s\n","El juego ha terminado Ganaste");
-				exit(EXIT_FAILURE);
-			
-				return;
+		{	
+			//pregunto si es un empate	
+			switch(tipoSimbolo){
 
+
+				case tu_turno:
+       								printf("Elige tu Jugada %s\n"," " );
+       								vg_turno=1;
+       							
+       								break;			
+
+
+
+				case empate:
+										puts("El juego quedo en empate\n");
+										exit(1);
+										break;
+
+				case circulo:
+								memcpy(&vg_cuadrante,buffer,tamanioMensaje);
+								vg_simbolo_retador=tipoSimbolo;
+								dibujar_en_cuadrante_desde_servidor(vg_cuadrante,vg_img1,vg_simbolo_retador);
+								free(buffer);
+								break;
+				case X:		
+						memcpy(&vg_cuadrante,buffer,tamanioMensaje);
+								vg_simbolo_retador=tipoSimbolo;
+								dibujar_en_cuadrante_desde_servidor(vg_cuadrante,vg_img1,vg_simbolo_retador);
+								free(buffer);
+								break;
+
+
+				case perdi:
+							puts("Acabo de perder  el juego");
+							close(vg_socket_fd);
+							exit(EXIT_FAILURE);	
+							break;	
+
+				case gane:
+								puts("Acabo de ganar  el juego");
+								close(vg_socket_fd);
+								exit(EXIT_FAILURE);	
+								break;	
+				case fuera_del_rango:
+								puts("Tu companiero quiso dibujar fuera del rango...esperelo a que intente de nuevo\n");
+							
+								break;
+
+				case simbolo_elegido:
+									//puts("Bienvenido al juego, elige el simbolo que deseas utilizar por favor 2 para X y 1 para O:\n");
+								
+									//scanf("%d",&vg_simbolo_jugador);
+									vg_simbolo_jugador=2;
+									tamanioMensaje=sizeof(tamanioMensaje);
+									buffer=malloc(tamanioMensaje);
+									memcpy(buffer,&vg_simbolo_jugador,tamanioMensaje);
+       								enviarPaquete(vg_socket_fd,simbolo_elegido,buffer,tamanioMensaje);
+       								free(buffer);
+       								//free(tamanioMensaje);
+       								break;
+       					
+				default:
+						
+				return;
+					
+
+			}
+			
+		}else{
+						close(vg_socket_fd);
+					//	printf("%s\n","El juego ha terminado Ganaste");
+						exit(EXIT_FAILURE);
+			
 		}
 		
 
@@ -157,20 +244,16 @@ int tiene_valores_consecutivos(int matriz_consecutivos[3][3],int tipoSimbolo)
 	// calculo horizontal vg_simbolo_retador
 	if(matriz_consecutivos[0][0] == tipoSimbolo && matriz_consecutivos[0][1] == tipoSimbolo && matriz_consecutivos[0][2] == tipoSimbolo)
 		return 1;
-	if(matriz_consecutivos[0][0] == vg_simbolo_retador && matriz_consecutivos[0][1] == vg_simbolo_retador && matriz_consecutivos[0][2] == vg_simbolo_retador)
-		return 1;
+	
 
 	if(matriz_consecutivos[1][0] == tipoSimbolo && matriz_consecutivos[1][1] == tipoSimbolo && matriz_consecutivos[1][2] == tipoSimbolo)
 		return 1;
 
-	if(matriz_consecutivos[1][0] == vg_simbolo_retador && matriz_consecutivos[1][1] == vg_simbolo_retador && matriz_consecutivos[1][2] == vg_simbolo_retador)
-		return 1;
 
 	if(matriz_consecutivos[2][0] == tipoSimbolo && matriz_consecutivos[2][1] == tipoSimbolo && matriz_consecutivos[2][2] == tipoSimbolo)
 		return 1;
 
-	if(matriz_consecutivos[2][0] == vg_simbolo_retador && matriz_consecutivos[2][1] == vg_simbolo_retador && matriz_consecutivos[2][2] == vg_simbolo_retador)
-		return 1;
+
 //fin de caculo horizontal
 
 	//calculo vertical vg_simbolo_retador
@@ -178,15 +261,13 @@ int tiene_valores_consecutivos(int matriz_consecutivos[3][3],int tipoSimbolo)
 	if(matriz_consecutivos[0][0] == tipoSimbolo && matriz_consecutivos[1][0] == tipoSimbolo && matriz_consecutivos[2][0] == tipoSimbolo)
 		return 1;
 
-	if(matriz_consecutivos[0][0] == vg_simbolo_retador && matriz_consecutivos[1][0] == vg_simbolo_retador && matriz_consecutivos[2][0] == vg_simbolo_retador)
-		return 1;
+	
 
 
 	if(matriz_consecutivos[0][1] == tipoSimbolo && matriz_consecutivos[1][1] == tipoSimbolo && matriz_consecutivos[2][1] == tipoSimbolo)
 		return 1;
 
-	if(matriz_consecutivos[0][1] == vg_simbolo_retador && matriz_consecutivos[1][1] == vg_simbolo_retador && matriz_consecutivos[2][1] == vg_simbolo_retador)
-		return 1;
+	
 
 
 	if(matriz_consecutivos[0][2] == tipoSimbolo && matriz_consecutivos[1][2] == tipoSimbolo && matriz_consecutivos[2][2] == tipoSimbolo)
@@ -198,14 +279,12 @@ int tiene_valores_consecutivos(int matriz_consecutivos[3][3],int tipoSimbolo)
 	if(matriz_consecutivos[0][0] == tipoSimbolo && matriz_consecutivos[1][1] == tipoSimbolo && matriz_consecutivos[2][2] == tipoSimbolo)
 		return 1;
 
-	if(matriz_consecutivos[0][0] == vg_simbolo_retador && matriz_consecutivos[1][1] == vg_simbolo_retador && matriz_consecutivos[2][2] == vg_simbolo_retador)
-		return 1;
+	
 
 	if(matriz_consecutivos[0][2] == tipoSimbolo && matriz_consecutivos[1][1] == tipoSimbolo && matriz_consecutivos[2][0] == tipoSimbolo)
 		return 1;
 
-	if(matriz_consecutivos[0][2] == vg_simbolo_retador && matriz_consecutivos[1][1] == vg_simbolo_retador && matriz_consecutivos[2][0] == vg_simbolo_retador)
-		return 1;
+	
 
 
 	//fin de calculo diagonal
@@ -217,14 +296,50 @@ int tiene_valores_consecutivos(int matriz_consecutivos[3][3],int tipoSimbolo)
 
 
 int dibujo_segun_estado(int matriz_estados[3][3],int matriz_consecutivos[3][3],int tipoSimbolo,Cuadrante cuadrante ){
+int tamanioMensaje, tipoMensaje;
+void* buffer;
 
-	
-	if(!tiene_valores_consecutivos(matriz_consecutivos,tipoSimbolo))
+	if(vg_empate >=9){
+			puts("El juego quedo en empate \n");
+			tamanioMensaje=sizeof(tipoMensaje);
+			buffer=malloc(tamanioMensaje);
+			memcpy(buffer,&tipoMensaje,tamanioMensaje);
+			enviarPaquete(vg_socket_fd,empate,buffer ,tamanioMensaje);
+			free(buffer);
+			close(vg_socket_fd);
+			exit(1);
+	}	
+
+	if(tiene_valores_consecutivos(matriz_consecutivos,tipoSimbolo)){
+			puts("Acabo de ganar el juego \n");
+			tamanioMensaje=sizeof(tipoMensaje);
+			buffer=malloc(tamanioMensaje);
+			memcpy(buffer,&tipoMensaje,tamanioMensaje);
+			enviarPaquete(vg_socket_fd,gane,buffer ,tamanioMensaje);
+			free(buffer);
+			close(vg_socket_fd);
+			exit(1);
+		}
+		if(tiene_valores_consecutivos(matriz_consecutivos,vg_simbolo_retador)){
+			puts("Acabo de perder el juego\n");
+			tamanioMensaje=sizeof(tipoMensaje);
+			buffer=malloc(tamanioMensaje);
+			memcpy(buffer,&tipoMensaje,tamanioMensaje);
+			enviarPaquete(vg_socket_fd,perdi,buffer ,tamanioMensaje);
+			free(buffer);
+			close(vg_socket_fd);
+			exit(1);
+		}
+
+	if(!tiene_valores_consecutivos(matriz_consecutivos,tipoSimbolo) && !tiene_valores_consecutivos(matriz_consecutivos,vg_simbolo_retador))
 	{
 					if(matriz_estados[cuadrante.pos1][cuadrante.pos2] == 1 )
 					{
 						matriz_consecutivos[cuadrante.pos1][cuadrante.pos2]=tipoSimbolo;
 						matriz_estados[cuadrante.pos1][cuadrante.pos2]= 0;
+						vg_empate++;
+
+					
 						return 1;
 					}
 					else
@@ -239,9 +354,10 @@ int dibujo_segun_estado(int matriz_estados[3][3],int matriz_consecutivos[3][3],i
 
 	}else{
 
-		printf("el juego ha terminado,Loser!!\n");
-		exit(EXIT_FAILURE);
+	//	printf("el juego ha terminado,gane!!\n");
+	//	exit(EXIT_FAILURE);
 	}
+
 
 	return 0;
 			
@@ -354,6 +470,18 @@ Cuadrante cuadrante;
 			cuadrante.pos2=2;
 		}
 
+		// si esta fuera del cuadrante
+		if((x<18 || x>285) || (y<16 || y>285)){
+
+			cuadrante.x1=POSICION_ERRONEA;
+			cuadrante.x2=POSICION_ERRONEA;
+			cuadrante.y1=POSICION_ERRONEA;
+			cuadrante.y2=POSICION_ERRONEA;
+			cuadrante.pos1=POSICION_ERRONEA;
+			cuadrante.pos2=POSICION_ERRONEA;
+
+		}
+
 
 
 		return cuadrante;
@@ -361,16 +489,16 @@ Cuadrante cuadrante;
 
 void dibujar_O(Cuadrante cuadrante,CvArr* img1){
 
-	cvCircle(img1, cvPoint( (cuadrante.x1 + cuadrante.x2)/2,(cuadrante.y1 + cuadrante.y2)/2), RADIO	, CV_RGB(0,0,0), 2, CV_AA, 0);
+	cvCircle(img1, cvPoint( (cuadrante.x1 + cuadrante.x2)/2,(cuadrante.y1 + cuadrante.y2)/2), RADIO	, CV_RGB(0,153,0), 2, CV_AA, 0);
 	cvShowImage(vg_name, img1);
 
 }
 
  void dibujar_x(Cuadrante cuadrante,CvArr* img1){
  							//x1,y1										//x2,y2
-		cvLine(img1, cvPoint(cuadrante.x1,cuadrante.y1),cvPoint(cuadrante.x2,cuadrante.y2), CV_RGB(0,0,0), 2, CV_AA , 0);
+		cvLine(img1, cvPoint(cuadrante.x1,cuadrante.y1),cvPoint(cuadrante.x2,cuadrante.y2), CV_RGB(255,0,0), 2, CV_AA , 0);
 							//x1,y2										//x2,y1
-		cvLine(img1, cvPoint(cuadrante.x1,cuadrante.y2),cvPoint(cuadrante.x2,cuadrante.y1), CV_RGB(0,0,0), 2, CV_AA , 0);
+		cvLine(img1, cvPoint(cuadrante.x1,cuadrante.y2),cvPoint(cuadrante.x2,cuadrante.y1), CV_RGB(255,0,0), 2, CV_AA , 0);
 		cvShowImage(vg_name, img1);
 
 
@@ -378,39 +506,30 @@ void dibujar_O(Cuadrante cuadrante,CvArr* img1){
 
   void dibujar_en_cuadrante(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo)
  {
-		switch(tipoSimbolo)
-		{
+ 		
+ 			switch(tipoSimbolo)
+			{
 
-			case circulo:		if(dibujo_segun_estado(matriz_estados,matriz_consecutivos,tipoSimbolo,cuadrante)){
+				case circulo:		if(dibujo_segun_estado(matriz_estados,matriz_consecutivos,tipoSimbolo,cuadrante)){
 
 									dibujar_O(cuadrante ,img1);
 									break;
 									}
-							
-								
-							
-							
-							
 
-			case X:			if(dibujo_segun_estado(matriz_estados,matriz_consecutivos,tipoSimbolo,cuadrante)){
-								dibujar_x(cuadrante,img1);
-								break;
 
-							}
-						
-						
-						
-						
-					
+				case X:			if(dibujo_segun_estado(matriz_estados,matriz_consecutivos,tipoSimbolo,cuadrante)){
+									dibujar_x(cuadrante,img1);
+									break;
 
-			default:
+								}
+
+				default:
 				printf("%s\n","Por favor elija un cuadrante disponible, este ya no lo esta\n");
-			return;
-
-		}
-
+				return;
+			}
 
 }
+		
 
   void dibujar_en_cuadrante_desde_servidor(Cuadrante cuadrante,CvArr* img1,int tipoSimbolo)
  {
@@ -422,10 +541,6 @@ void dibujar_O(Cuadrante cuadrante,CvArr* img1){
 									dibujar_O(cuadrante ,img1);
 									break;
 									}
-							
-								
-							
-							
 							
 
 			case X:			if(dibujo_segun_estado(matriz_estados,matriz_consecutivos,tipoSimbolo,cuadrante)){
@@ -446,6 +561,30 @@ void dibujar_O(Cuadrante cuadrante,CvArr* img1){
 
 		}
 }
+
+
+int estafueraDelRango(Cuadrante cuadrante){
+int tamanioMensaje, tipoMensaje;
+void* buffer;
+	// si esta fuera del cuadrante
+		if((cuadrante.pos1 == -1) && (cuadrante.pos2 == -1))
+		{
+			puts("Estas fuera del rango, elige otro lugar \n");
+			tamanioMensaje=sizeof(tipoMensaje);
+			buffer=malloc(tamanioMensaje);
+			memcpy(buffer,&tipoMensaje,tamanioMensaje);
+			enviarPaquete(vg_socket_fd,fuera_del_rango,buffer ,tamanioMensaje);
+			free(buffer);
+			return 1;
+			
+		}else{
+			
+			return 0;
+		}
+
+		
+}
+
 void mouseHandler(int event, int x, int y, int flags, void* param)
 {	
 	void* buffer;
@@ -454,20 +593,45 @@ void mouseHandler(int event, int x, int y, int flags, void* param)
 	{	
 	
 
-
 	}
-	if(event == CV_EVENT_LBUTTONDOWN ){
-	vg_cuadrante=calcular_cuadrante(x,y);
- 	dibujar_en_cuadrante(vg_cuadrante,vg_img1,vg_simbolo_jugador);
- 	tamanioMensaje=sizeof(Cuadrante);
-	buffer=malloc(tamanioMensaje);
-	memcpy(buffer,&vg_cuadrante,tamanioMensaje);
-	enviarPaquete(vg_socket_fd,vg_simbolo_jugador,buffer,tamanioMensaje);
-	free(buffer);
-	//printf("se cargaron las corrdenadas x1:%d x2:%d \n",vg_cuadrante.x1,vg_cuadrante.x2);
+	if(event == CV_EVENT_LBUTTONDOWN )
+	{
+		vg_cuadrante=calcular_cuadrante(x,y);
+		if(vg_turno==1)
+		{
+					
+
+ 					if(estafueraDelRango(vg_cuadrante))
+ 					{
+ 						puts("Dibuje de nuevo por favor\n");
+ 					}else
+ 					{
+
+ 					dibujar_en_cuadrante(vg_cuadrante,vg_img1,vg_simbolo_jugador);
+ 					tamanioMensaje=sizeof(Cuadrante);
+					buffer=malloc(tamanioMensaje);
+					memcpy(buffer,&vg_cuadrante,tamanioMensaje);
+					enviarPaquete(vg_socket_fd,vg_simbolo_jugador,buffer,tamanioMensaje);
+					enviarPaquete(vg_socket_fd,tu_turno,buffer,tamanioMensaje);
+					vg_turno=0;
+					free(buffer);
+ 					
+					//printf("se cargaron las corrdenadas x1:%d x2:%d \n",vg_cuadrante.x1,vg_cuadrante.x2);
+
+ 					}
+
  	
+ 	
+ 		}else
+ 		{
+ 			puts("aun no es tu turno, espere a que juegue tu companiero\n");
+
+ 		}
  	
 	}
 	
 	
 }
+
+
+
